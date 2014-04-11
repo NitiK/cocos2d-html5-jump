@@ -55,15 +55,19 @@ var Jumper = cc.Sprite.extend({
 
         this.updateSpritePosition();
     },
+    
+    isNotMove: function(){
+        return ( !this.moveLeft ) && ( !this.moveRight );
+    },
 
     updateXMovement: function() {
         if ( this.ground ) {
-            if ( ( !this.moveLeft ) && ( !this.moveRight ) ) {
+            if ( this.isNotMove() ) {
                 this.autoDeaccelerateX();
             } else if ( this.moveRight ) {
-                this.accelerateX( 1 );
+                this.accelerateX( Jumper.accelRight );
             } else {
-                this.accelerateX( -1 );
+                this.accelerateX( Jumper.accelLeft );
             }
         }
         this.x += this.vx;
@@ -74,18 +78,26 @@ var Jumper = cc.Sprite.extend({
             this.x -= screenWidth;
         }
     },
+    
+    jumpUp: function(){
+        this.vy = this.jumpV;
+        this.y = this.ground.getTopY() + this.vy;
+        this.ground = null;
+    },
+    
+    fallDown: function(){
+        this.vy += this.g;
+        this.y += this.vy;
+    },
 
     updateYMovement: function() {
         if ( this.ground ) {
             this.vy = 0;
             if ( this.jump ) {
-                this.vy = this.jumpV;
-                this.y = this.ground.getTopY() + this.vy;
-                this.ground = null;
+                this.jumpUp();        
             }
         } else {
-            this.vy += this.g;
-            this.y += this.vy;
+            this.fallDown();
         }
     },
 
@@ -172,6 +184,8 @@ var Jumper = cc.Sprite.extend({
     }
 });
 
+Jumper.accelRight = 1;
+Jumper.accelLeft = -1;
 Jumper.KEYMAP = {}
 Jumper.KEYMAP[cc.KEY.left] = 'moveLeft';
 Jumper.KEYMAP[cc.KEY.right] = 'moveRight';
